@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UGUI'den UI Toolkit'e</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14161a;
+    --bg-alt: #191c21;
+    --panel: #1e2126;
+    --panel-2: #24272e;
+    --line: #2c3038;
+    --text: #e9e7e2;
+    --text-dim: #9aa0ab;
+    --text-faint: #5f6570;
+    --ugui: #f2a65a;
+    --ugui-dim: #6b5439;
+    --uitk: #5eeada;
+    --uitk-dim: #2f5a56;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html{ scroll-behavior: smooth; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--uitk-dim); color: var(--text); }
+
+  a{ color: inherit; }
+
+  /* ---------- layout shell ---------- */
+  .shell{
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    max-width: 1320px;
+    margin: 0 auto;
+  }
+  @media (max-width: 900px){
+    .shell{ grid-template-columns: 1fr; }
+    nav.side{ display:none; }
+  }
+
+  nav.side{
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    padding: 40px 20px 40px 32px;
+    border-right: 1px solid var(--line);
+    overflow-y: auto;
+  }
+  nav.side .brand{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  nav.side ol{
+    list-style: none;
+    counter-reset: navcount;
+  }
+  nav.side li{
+    counter-increment: navcount;
+    margin-bottom: 4px;
+  }
+  nav.side a{
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    text-decoration: none;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    padding: 7px 10px;
+    border-radius: 6px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  nav.side a:hover{ background: var(--panel); color: var(--text); }
+  nav.side a::before{
+    content: counter(navcount, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  nav.side .toggle-note{
+    margin-top: 32px;
+    padding: 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  main{ padding: 0 48px 120px; }
+  @media (max-width: 900px){ main{ padding: 0 20px 100px; } }
+
+  section{ padding-top: 88px; scroll-margin-top: 24px; }
+
+  .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .eyebrow .dot{
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  h2{
+    font-family: var(--font-display);
+    font-size: clamp(24px, 3vw, 34px);
+    font-weight: 600;
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+  }
+  h3{
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  p{ color: var(--text-dim); max-width: 68ch; margin-bottom: 14px; font-size: 15px; }
+  p code, li code{
+    font-family: var(--font-mono);
+    background: var(--panel-2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    color: var(--text);
+  }
+
+  /* ---------- hero ---------- */
+  header.hero{
+    padding: 90px 48px 60px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+  @media (max-width: 900px){ header.hero{ padding: 60px 20px 40px; } }
+  header.hero .kicker{
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-faint);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  header.hero h1{
+    font-family: var(--font-display);
+    font-size: clamp(36px, 6vw, 60px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    max-width: 14ch;
+    margin-bottom: 22px;
+  }
+  header.hero h1 .accent-a{ color: var(--ugui); }
+  header.hero h1 .accent-b{ color: var(--uitk); }
+  header.hero p.lede{
+    max-width: 56ch;
+    font-size: 16.5px;
+    color: var(--text-dim);
+  }
+  .hero-diagram{ margin-top: 56px; }
+
+  /* ---------- compare grid: two columns UGUI / UI Toolkit ---------- */
+  .compare{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 22px 0 8px;
+  }
+  @media (max-width: 720px){ .compare{ grid-template-columns: 1fr; } }
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .card .card-head{
+    display:flex; align-items:center; gap:8px;
+    padding: 12px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--line);
+  }
+  .card.ugui .card-head{ color: var(--ugui); background: linear-gradient(180deg, rgba(242,166,90,0.08), transparent); }
+  .card.uitk .card-head{ color: var(--uitk); background: linear-gradient(180deg, rgba(94,234,218,0.08), transparent); }
+  .card .card-head .chip{ width:8px; height:8px; border-radius:2px; }
+  .card.ugui .chip{ background: var(--ugui); }
+  .card.uitk .chip{ background: var(--uitk); }
+
+  pre{
+    font-family: var(--font-mono);
+    font-size: 12.6px;
+    line-height: 1.65;
+    padding: 16px;
+    overflow-x: auto;
+    color: #dcdfe4;
+    background: var(--bg-alt);
+  }
+  .card p.desc{
+    padding: 12px 16px 16px;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    margin: 0;
+  }
+  .tag-kw{ color: #c586c0; }
+  .tag-type{ color: #4ec9b0; }
+  .tag-str{ color: #ce9178; }
+  .tag-fn{ color: #dcdcaa; }
+  .tag-com{ color: #6a7280; font-style: italic; }
+  .tag-prop{ color: #9cdcfe; }
+
+  /* ---------- diagram panels ---------- */
+  .diagram-panel{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 22px 0;
+  }
+  .diagram-panel svg{ width: 100%; height: auto; display:block; }
+  .diagram-caption{
+    display:flex; justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-faint);
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--line);
+  }
+
+  /* ---------- decision table ---------- */
+  table.decision{
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+  table.decision th{
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  table.decision td{
+    padding: 14px;
+    border-bottom: 1px solid var(--line);
+    color: var(--text-dim);
+    vertical-align: top;
+  }
+  table.decision td:first-child{ color: var(--text); font-weight: 500; width: 26%; }
+  table.decision tr:last-child td{ border-bottom: none; }
+  .pill{
+    display:inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-right: 6px;
+  }
+  .pill.ugui{ background: rgba(242,166,90,0.14); color: var(--ugui); }
+  .pill.uitk{ background: rgba(94,234,218,0.14); color: var(--uitk); }
+
+  /* ---------- callout ---------- */
+  .callout{
+    border-left: 3px solid var(--uitk);
+    background: var(--panel);
+    padding: 16px 20px;
+    border-radius: 0 10px 10px 0;
+    margin: 22px 0;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .callout b{ color: var(--text); }
+  .callout.warn{ border-left-color: var(--ugui); }
+
+  footer{
+    padding: 40px 48px 60px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="side">
+    <div class="brand">UGUI → UI Toolkit</div>
+    <ol>
+      <li><a href="#felsefe">Felsefe farkı</a></li>
+      <li><a href="#uxml">Hierarchy → UXML</a></li>
+      <li><a href="#uss">Inspector → USS</a></li>
+      <li><a href="#layout">RectTransform → Flexbox</a></li>
+      <li><a href="#csharp">Component erişimi</a></li>
+      <li><a href="#referans">Referans tutma & aç/kapat</a></li>
+      <li><a href="#eventsystem">EventSystem</a></li>
+      <li><a href="#prefab">Prefab → CloneTree</a></li>
+      <li><a href="#karar">Ne zaman hangisi</a></li>
+    </ol>
+    <div class="toggle-note">
+      Sol sütun her zaman <span style="color:var(--ugui)">UGUI</span>, sağ sütun <span style="color:var(--uitk)">UI Toolkit</span> karşılığı. Zaten bildiğin taraftan başlayıp diğerine bak.
+    </div>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="kicker">Unity · Rider'da açık tutulacak referans</div>
+      <h1>UGUI'yi <span class="accent-a">GameObject</span>'ler üzerinden biliyorsun.<br>Şimdi aynı şeyi <span class="accent-b">VisualElement</span>'lerle gör.</h1>
+      <p class="lede">Bu sayfa her UI Toolkit kavramını, zaten bildiğin UGUI karşılığının yanına koyuyor. Kod, layout mantığı ve diyagramlar hep aynı sırada: solda tanıdık, sağda yeni.</p>
+
+      <div class="hero-diagram diagram-panel">
+        <svg viewBox="0 0 920 260" xmlns="http://www.w3.org/2000/svg">
+          <!-- left: UGUI GameObject tree -->
+          <text x="30" y="28" font-family="JetBrains Mono" font-size="12" fill="#f2a65a" letter-spacing="1">GAMEOBJECT AĞACI (UGUI)</text>
+          <g font-family="JetBrains Mono" font-size="12.5" fill="#dcdfe4">
+            <rect x="30" y="46" width="160" height="30" rx="5" fill="#24272e" stroke="#6b5439"/>
+            <text x="42" y="65">Canvas</text>
+
+            <line x1="60" y1="76" x2="60" y2="96" stroke="#3a3d44"/>
+            <rect x="55" y="96" width="150" height="30" rx="5" fill="#24272e" stroke="#3a3d44"/>
+            <text x="67" y="115">Panel (Image)</text>
+
+            <line x1="85" y1="126" x2="85" y2="146" stroke="#3a3d44"/>
+            <rect x="80" y="146" width="170" height="30" rx="5" fill="#24272e" stroke="#3a3d44"/>
+            <text x="92" y="165">PlayButton (Button)</text>
+
+            <line x1="110" y1="176" x2="110" y2="196" stroke="#3a3d44"/>
+            <rect x="105" y="196" width="150" height="30" rx="5" fill="#24272e" stroke="#3a3d44"/>
+            <text x="117" y="215">Text (TMP)</text>
+          </g>
+          <text x="30" y="248" font-family="Inter" font-size="11" fill="#5f6570">Her kutu bir GameObject + RectTransform + Component</text>
+
+          <!-- divider -->
+          <line x1="460" y1="20" x2="460" y2="240" stroke="#2c3038" stroke-dasharray="4 5"/>
+
+          <!-- right: UI Toolkit VisualElement tree -->
+          <text x="500" y="28" font-family="JetBrains Mono" font-size="12" fill="#5eeada" letter-spacing="1">VISUALELEMENT AĞACI (UI TOOLKIT)</text>
+          <g font-family="JetBrains Mono" font-size="12.5" fill="#dcdfe4">
+            <rect x="500" y="46" width="200" height="30" rx="5" fill="#24272e" stroke="#2f5a56"/>
+            <text x="512" y="65">rootVisualElement</text>
+
+            <line x1="530" y1="76" x2="530" y2="96" stroke="#3a3d44"/>
+            <rect x="525" y="96" width="150" height="30" rx="5" fill="#24272e" stroke="#3a3d44"/>
+            <text x="537" y="115">VisualElement.panel</text>
+
+            <line x1="555" y1="126" x2="555" y2="146" stroke="#3a3d44"/>
+            <rect x="550" y="146" width="150" height="30" rx="5" fill="#24272e" stroke="#3a3d44"/>
+            <text x="562" y="165">Button #play-button</text>
+
+            <line x1="580" y1="176" x2="580" y2="196" stroke="#3a3d44"/>
+            <rect x="575" y="196" width="130" height="30" rx="5" fill="#24272e" stroke="#3a3d44"/>
+            <text x="587" y="215">Label</text>
+          </g>
+          <text x="500" y="248" font-family="Inter" font-size="11" fill="#5f6570">Her kutu sadece C# nesnesi — GameObject yok, ekstra draw call yok</text>
+        </svg>
+        <div class="diagram-caption">
+          <span>şekil 1 — aynı buton, iki farklı ağaç yapısı</span>
+          <span>hierarchy.uxml ↔ MainMenu.uxml</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ 1. FELSEFE ============ -->
+    <section id="felsefe">
+      <div class="eyebrow"><span class="dot" style="background:var(--uitk)"></span>01 · Zihniyet</div>
+      <h2>Sahne parçası değil, doküman ağacı</h2>
+      <p>UGUI'de her buton, panel, ikon; Hierarchy'de gerçek bir <code>GameObject</code>'tir. Sahneye aittir, <code>Transform</code>'u vardır, <code>Instantiate</code> ile çoğaltılır. UI Toolkit'te ise eleman ağacı tamamen kendi dünyasında yaşar — <code>UIDocument</code> component'i bu ağacı sahneye "bağlar", ama elemanların kendisi asla GameObject olmaz.</p>
+      <p>Pratik sonucu: yüzlerce envanter slotu, tag butonu, diyalog satırı gibi tekrarlayan UI'larda UI Toolkit ciddi şekilde daha hafif çalışır — çünkü ortada GameObject instantiate/destroy maliyeti, ekstra Transform hesaplaması, Canvas rebuild'i yok.</p>
+
+      <div class="compare">
+        <div class="card ugui">
+          <div class="card-head"><span class="chip"></span>UGUI zihniyeti</div>
+          <p class="desc">"UI = Sahne." Hierarchy penceresinde gezinirsin, her eleman Inspector'da ayrı ayrı Component taşır, Prefab olarak paketlenir.</p>
+        </div>
+        <div class="card uitk">
+          <div class="card-head"><span class="chip"></span>UI Toolkit zihniyeti</div>
+          <p class="desc">"UI = Doküman." UXML'de yapıyı, USS'te stili tanımlarsın; C# tarafında sadece <code>Q&lt;T&gt;()</code> ile sorgu atarsın — web geliştirmedeki DOM/CSS ayrımının aynısı.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 2. UXML ============ -->
+    <section id="uxml">
+      <div class="eyebrow"><span class="dot" style="background:var(--uitk)"></span>02 · Yapı</div>
+      <h2>Hierarchy kurmak yerine UXML yazmak</h2>
+      <p>UGUI'de bir panel + buton kurmak için Hierarchy'de sağ tık → GameObject oluşturursun. UI Toolkit'te bunun karşılığı bir <code>.uxml</code> dosyası; UI Builder penceresi de bunu görsel olarak düzenlemeni sağlar (Window → UI Toolkit → UI Builder).</p>
+
+      <div class="compare">
+        <div class="card ugui">
+          <div class="card-head"><span class="chip"></span>Hierarchy (UGUI)</div>
+          <pre><span class="tag-com">// Hierarchy penceresinde:</span>
+Panel (Image)
+ └── PlayButton (Button, Image)
+      └── Text (TextMeshProUGUI)</pre>
+          <p class="desc">Her satır ayrı bir GameObject. Prefab yapıp variant türetmediğin sürece yeniden kullanım zahmetli.</p>
+        </div>
+        <div class="card uitk">
+          <div class="card-head"><span class="chip"></span>MainMenu.uxml</div>
+          <pre><span class="tag-kw">&lt;ui:VisualElement</span> <span class="tag-prop">class</span>=<span class="tag-str">"panel"</span><span class="tag-kw">&gt;</span>
+    <span class="tag-kw">&lt;ui:Button</span>
+        <span class="tag-prop">name</span>=<span class="tag-str">"play-button"</span>
+        <span class="tag-prop">text</span>=<span class="tag-str">"Play"</span>
+        <span class="tag-prop">class</span>=<span class="tag-str">"play-btn"</span> <span class="tag-kw">/&gt;</span>
+<span class="tag-kw">&lt;/ui:VisualElement&gt;</span></pre>
+          <p class="desc"><code>name</code> = obje ismin gibi (tek, benzersiz sorgu için), <code>class</code> = stil paylaşımı için. Aynı UXML'i farklı sahnelerde tekrar kullanabilirsin.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 3. USS ============ -->
+    <section id="uss">
+      <div class="eyebrow"><span class="dot" style="background:var(--uitk)"></span>03 · Görünüm</div>
+      <h2>Inspector'da tek tek ayar yerine paylaşılan stil</h2>
+      <p>UGUI'de bir butonun rengini, boyutunu, hover davranışını Inspector'dan o objeye özel ayarlarsın — <code>Selectable</code>'ın Normal/Highlighted/Pressed renkleri buna örnek. USS'te CSS mantığıyla class üzerinden tanımlarsın; <code>:hover</code>, <code>:active</code>, <code>:focus</code> pseudo-class'ları bile var.</p>
+
+      <div class="compare">
+        <div class="card ugui">
+          <div class="card-head"><span class="chip"></span>Inspector ayarları</div>
+          <pre><span class="tag-com">// Button (Script) → Transition: Color Tint</span>
+Normal Color:      #C83C3C
+Highlighted Color: #DC5050
+Pressed Color:     #A82E2E
+<span class="tag-com">// Image (Script)</span>
+Padding: 10, 20, 10, 20</pre>
+          <p class="desc">Değişiklik yapmak için o objeye tıklayıp Inspector'ı düzenlersin. 50 tane benzer buton varsa 50 kere.</p>
+        </div>
+        <div class="card uitk">
+          <div class="card-head"><span class="chip"></span>MainMenu.uss</div>
+          <pre><span class="tag-fn">.play-btn</span> {
+    <span class="tag-prop">background-color</span>: <span class="tag-fn">rgb</span>(200, 60, 60);
+    <span class="tag-prop">padding</span>: 10px 20px;
+    <span class="tag-prop">border-radius</span>: 8px;
+    <span class="tag-prop">font-size</span>: 24px;
+}
+
+<span class="tag-fn">.play-btn:hover</span> {
+    <span class="tag-prop">background-color</span>: <span class="tag-fn">rgb</span>(220, 80, 80);
+}</pre>
+          <p class="desc">Bir class'ı değiştirirsin, o class'a sahip her eleman güncellenir — 50 buton olsa da tek satır.</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <b>Not:</b> DOTween'i doğrudan USS elemanlarına bağlayamazsın; onun yerine native <code>transition-property</code> / <code>transition-duration</code> gibi CSS geçişlerini ya da <code>experimental.animation</code> API'sini kullanırsın.
+      </div>
+    </section>
+
+    <!-- ============ 4. LAYOUT ============ -->
+    <section id="layout">
+      <div class="eyebrow"><span class="dot" style="background:var(--uitk)"></span>04 · Yerleşim</div>
+      <h2>Anchor/Pivot yerine Flexbox</h2>
+      <p>Bu muhtemelen en büyük alışkanlık değişimi. UGUI'de <code>RectTransform</code>'un anchor'ları, pivot'u, <code>anchoredPosition</code>'ı ile uğraşırsın; responsive için <code>Vertical/Horizontal Layout Group</code> + <code>Content Size Fitter</code> eklersin. UI Toolkit'in layout motoru <b>Yoga</b> (Flexbox'ın kendisi) — anchor kavramı yok, her şey flex kurallarıyla akar.</p>
+
+      <div class="diagram-panel">
+        <svg viewBox="0 0 920 220" xmlns="http://www.w3.org/2000/svg">
+          <text x="20" y="24" font-family="JetBrains Mono" font-size="12" fill="#f2a65a">RECTTRANSFORM — ANCHOR NOKTALARI</text>
+          <rect x="20" y="40" width="380" height="150" rx="6" fill="#24272e" stroke="#3a3d44"/>
+          <!-- anchor corners -->
+          <circle cx="20" cy="40" r="4" fill="#f2a65a"/>
+          <circle cx="400" cy="40" r="4" fill="#f2a65a"/>
+          <circle cx="20" cy="190" r="4" fill="#f2a65a"/>
+          <circle cx="400" cy="190" r="4" fill="#f2a65a"/>
+          <rect x="150" y="95" width="120" height="40" rx="4" fill="#2c2417" stroke="#f2a65a" stroke-dasharray="3 3"/>
+          <text x="170" y="120" font-family="JetBrains Mono" font-size="11" fill="#f2a65a">Button</text>
+          <line x1="20" y1="115" x2="150" y2="115" stroke="#6b5439" stroke-dasharray="2 3"/>
+          <line x1="270" y1="115" x2="400" y2="115" stroke="#6b5439" stroke-dasharray="2 3"/>
+          <text x="45" y="108" font-family="JetBrains Mono" font-size="10" fill="#8a6a3f">anchoredPosition.x</text>
+
+          <line x1="460" y1="10" x2="460" y2="210" stroke="#2c3038" stroke-dasharray="4 5"/>
+
+          <text x="500" y="24" font-family="JetBrains Mono" font-size="12" fill="#5eeada">FLEXBOX — JUSTIFY / ALIGN</text>
+          <rect x="500" y="40" width="380" height="150" rx="6" fill="#24272e" stroke="#3a3d44"/>
+          <text x="512" y="56" font-family="JetBrains Mono" font-size="9.5" fill="#5f6570">justify-content: center; align-items: center;</text>
+          <rect x="620" y="95" width="120" height="40" rx="4" fill="#17302d" stroke="#5eeada"/>
+          <text x="640" y="120" font-family="JetBrains Mono" font-size="11" fill="#5eeada">Button</text>
+          <!-- flex arrows -->
+          <line x1="500" y1="115" x2="620" y2="115" stroke="#2f5a56" stroke-width="2" marker-end="url(#arrow)"/>
+          <line x1="880" y1="115" x2="740" y2="115" stroke="#2f5a56" stroke-width="2" marker-end="url(#arrow)"/>
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#2f5a56"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="diagram-caption">
+          <span>şekil 2 — konumu sen mi hesaplıyorsun, motor mu?</span>
+          <span>anchoredPosition ↔ flex-direction/justify-content</span>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="card ugui">
+          <div class="card-head"><span class="chip"></span>Layout Group + Content Size Fitter</div>
+          <pre><span class="tag-com">// Vertical Layout Group</span>
+Child Alignment: Middle Center
+Spacing: 12
+Control Child Size: ✓ Width / Height
+
+<span class="tag-com">// Content Size Fitter</span>
+Horizontal Fit: Preferred Size</pre>
+          <p class="desc">İki ayrı Component eklemen, aralarındaki etkileşimi öğrenmen gerekir (biri boyutu, diğeri diziliş yönünü kontrol eder).</p>
+        </div>
+        <div class="card uitk">
+          <div class="card-head"><span class="chip"></span>USS flex kuralları</div>
+          <pre><span class="tag-fn">.container</span> {
+    <span class="tag-prop">flex-direction</span>: column;
+    <span class="tag-prop">justify-content</span>: center;
+    <span class="tag-prop">align-items</span>: center;
+    <span class="tag-prop">flex-grow</span>: 1;
+}</pre>
+          <p class="desc"><code>flex-direction: row</code> = Horizontal Layout Group, <code>column</code> = Vertical Layout Group. <code>flex-grow</code>, Content Size Fitter'ın işini tek satırda halleder.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 5. C# ============ -->
+    <section id="csharp">
+      <div class="eyebrow"><span class="dot" style="background:var(--uitk)"></span>05 · Kod</div>
+      <h2>GetComponent yerine Query (Q&lt;T&gt;)</h2>
+      <p>UGUI'de referansı Inspector'dan sürükleyip bırakırsın ya da <code>GetComponent</code>/<code>GetComponentInChildren</code> çağırırsın. UI Toolkit'te <code>UIDocument</code>'ın <code>rootVisualElement</code>'ından <code>Q&lt;T&gt;("isim")</code> ile ağaçta arama yaparsın — mantığı <code>GetComponentInChildren</code> ile birebir aynı, sözdizimi farklı.</p>
+
+      <div class="compare">
+        <div class="card ugui">
+          <div class="card-head"><span class="chip"></span>MainMenu.cs (UGUI)</div>
+          <pre><span class="tag-kw">public class</span> <span class="tag-type">MainMenu</span> : <span class="tag-type">MonoBehaviour</span>
+{
+    <span class="tag-kw">public</span> <span class="tag-type">Button</span> playButton;
+
+    <span class="tag-kw">void</span> <span class="tag-fn">Start</span>()
+    {
+        playButton.onClick.AddListener(OnPlayClicked);
+    }
+
+    <span class="tag-kw">void</span> <span class="tag-fn">OnPlayClicked</span>()
+    {
+        Debug.Log(<span class="tag-str">"Play basıldı"</span>);
+    }
+}</pre>
+        </div>
+        <div class="card uitk">
+          <div class="card-head"><span class="chip"></span>MainMenu.cs (UI Toolkit)</div>
+          <pre><span class="tag-kw">public class</span> <span class="tag-type">MainMenu</span> : <span class="tag-type">MonoBehaviour</span>
+{
+    <span class="tag-kw">private</span> <span class="tag-type">VisualElement</span> root;
+
+    <span class="tag-kw">void</span> <span class="tag-fn">OnEnable</span>()
+    {
+        root = GetComponent&lt;UIDocument&gt;().rootVisualElement;
+        <span class="tag-kw">var</span> playButton = root.Q&lt;Button&gt;(<span class="tag-str">"play-button"</span>);
+        playButton.clicked += OnPlayClicked;
+    }
+
+    <span class="tag-kw">void</span> <span class="tag-fn">OnPlayClicked</span>()
+    {
+        Debug.Log(<span class="tag-str">"Play basıldı"</span>);
+    }
+}</pre>
+        </div>
+      </div>
+      <p><code>Q&lt;Button&gt;("play-button")</code> UXML'deki <code>name="play-button"</code>'a karşılık gelir. Class ile de arama yapılır: <code>root.Query&lt;VisualElement&gt;(className: "panel")</code> — birden fazla sonuç döner, <code>ToList()</code> ile toplarsın.</p>
+    </section>
+
+    <!-- ============ 6. REFERANS ============ -->
+    <section id="referans">
+      <div class="eyebrow"><span class="dot" style="background:var(--uitk)"></span>06 · Referans tutma</div>
+      <h2>Inspector'a sürükleme yok — bir kere sorgula, sakla</h2>
+      <p>UGUI'de <code>public Button playButton;</code> yazıp Inspector'dan sürükleyip bırakırsın; referans sahne verisiyle birlikte serialize edilir. UI Toolkit'te <code>VisualElement</code>'lar Unity <code>Object</code>'i olmadığı için Inspector'a sürüklenemez — tek yol, ağacı bir kere <code>Q&lt;T&gt;()</code> ile sorgulayıp sonucu bir C# alanında (field) saklamak. Bunu genelde <code>OnEnable</code>'da, "kur ve sakla" mantığıyla yaparsın; her <code>Update</code>'te tekrar sorgulamazsın çünkü <code>Query</code> de bir maliyettir.</p>
+
+      <div class="compare">
+        <div class="card ugui">
+          <div class="card-head"><span class="chip"></span>Referans + aç/kapat (UGUI)</div>
+          <pre><span class="tag-kw">public class</span> <span class="tag-type">ShopPanel</span> : <span class="tag-type">MonoBehaviour</span>
+{
+    <span class="tag-com">// Inspector'dan sürükle-bırak</span>
+    <span class="tag-kw">public</span> <span class="tag-type">Button</span> buyButton;
+    <span class="tag-kw">public</span> <span class="tag-type">GameObject</span> lockedIcon;
+
+    <span class="tag-kw">void</span> <span class="tag-fn">Refresh</span>(<span class="tag-kw">bool</span> canAfford)
+    {
+        buyButton.interactable = canAfford;
+        lockedIcon.SetActive(!canAfford);
+        gameObject.SetActive(<span class="tag-kw">true</span>); <span class="tag-com">// panelin kendisi</span>
+    }
+}</pre>
+          <p class="desc">Referans Inspector'da sabit; <code>interactable</code> tıklanabilirliği, <code>SetActive</code> ise objeyi hierarchy'den tamamen kaldırır (Transform dahil her şeyi devre dışı bırakır).</p>
+        </div>
+        <div class="card uitk">
+          <div class="card-head"><span class="chip"></span>Referans + aç/kapat (UI Toolkit)</div>
+          <pre><span class="tag-kw">public class</span> <span class="tag-type">ShopPanel</span> : <span class="tag-type">MonoBehaviour</span>
+{
+    <span class="tag-kw">private</span> <span class="tag-type">Button</span> buyButton;
+    <span class="tag-kw">private</span> <span class="tag-type">VisualElement</span> lockedIcon;
+    <span class="tag-kw">private</span> <span class="tag-type">VisualElement</span> panel;
+
+    <span class="tag-kw">void</span> <span class="tag-fn">OnEnable</span>()
+    {
+        <span class="tag-kw">var</span> root = GetComponent&lt;UIDocument&gt;().rootVisualElement;
+        <span class="tag-com">// bir kere sorgula, field'a sakla</span>
+        buyButton  = root.Q&lt;Button&gt;(<span class="tag-str">"buy-button"</span>);
+        lockedIcon = root.Q&lt;VisualElement&gt;(<span class="tag-str">"locked-icon"</span>);
+        panel      = root.Q&lt;VisualElement&gt;(<span class="tag-str">"shop-panel"</span>);
+    }
+
+    <span class="tag-kw">void</span> <span class="tag-fn">Refresh</span>(<span class="tag-kw">bool</span> canAfford)
+    {
+        buyButton.SetEnabled(canAfford);
+        lockedIcon.style.display = canAfford
+            ? DisplayStyle.None : DisplayStyle.Flex;
+        panel.style.display = DisplayStyle.Flex;
+    }
+}</pre>
+          <p class="desc">Sorguyu <code>OnEnable</code>'da bir kere yapıp field'da tutmak, UGUI'deki Inspector referansının karşılığı. <code>SetEnabled</code> tıklanabilirliği, <code>style.display</code> görünürlüğü kontrol eder.</p>
+        </div>
+      </div>
+
+      <table class="decision">
+        <thead>
+          <tr><th>Ne yapmak istiyorsun</th><th>UGUI</th><th>UI Toolkit</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Tamamen gizle, layout'tan da çıkar</td>
+            <td><code>gameObject.SetActive(false)</code></td>
+            <td><code>element.style.display = DisplayStyle.None</code></td>
+          </tr>
+          <tr>
+            <td>Görünmez yap ama yerini koru (layout bozulmasın)</td>
+            <td><code>CanvasGroup.alpha = 0</code></td>
+            <td><code>element.style.visibility = Visibility.Hidden</code></td>
+          </tr>
+          <tr>
+            <td>Görünsün ama tıklanmasın (soluk/disabled görünüm)</td>
+            <td><code>button.interactable = false</code></td>
+            <td><code>button.SetEnabled(false)</code></td>
+          </tr>
+          <tr>
+            <td>Fare/tıklamayı yok say ama görsel olarak aktif kalsın</td>
+            <td><code>CanvasGroup.blocksRaycasts = false</code></td>
+            <td><code>element.pickingMode = PickingMode.Ignore</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        <b>Dikkat:</b> <code>DisplayStyle.None</code> verdiğin eleman layout hesabından tamamen çıkar (RectTransform'suz bir <code>SetActive(false)</code> gibi düşün) — o alanı boş bırakmasını istiyorsan <code>Visibility.Hidden</code> kullanmalısın, o da UGUI'deki <code>CanvasGroup.alpha = 0</code>'a karşılık gelir.
+      </div>
+
+      <div class="callout">
+        <b>Birden fazla eleman için referans:</b> Tag sistemindeki gibi çok sayıda benzer eleman varsa tek tek field açmak yerine bir <code>Dictionary&lt;TagData, VisualElement&gt;</code> ya da <code>List&lt;Button&gt;</code> tutup <code>Query&lt;Button&gt;(className: "tag-btn").ToList()</code> ile toplu sorgulayabilirsin — UGUI'deki <code>GetComponentsInChildren&lt;Button&gt;()</code> ile aynı mantık.
+      </div>
+    </section>
+
+    <!-- ============ 7. EVENTSYSTEM ============ -->
+    <section id="eventsystem">
+      <div class="eyebrow"><span class="dot" style="background:var(--uitk)"></span>07 · Girdi sistemi</div>
+      <h2>EventSystem GameObject'ine gerek yok</h2>
+      <div class="compare">
+        <div class="card ugui">
+          <div class="card-head"><span class="chip"></span>UGUI gereksinimi</div>
+          <p class="desc">Sahnede mutlaka bir <code>EventSystem</code> GameObject'i olmalı (+ Input Module). Yoksa hiçbir buton tıklamaz, Inspector'da sessizce başarısız olur.</p>
+        </div>
+        <div class="card uitk">
+          <div class="card-head"><span class="chip"></span>UI Toolkit davranışı</div>
+          <p class="desc"><code>UIDocument</code> component'i runtime girdi işlemeyi kendi içinde barındırır, ayrı bir EventSystem gerekmez. <code>Panel Settings</code> asset'i sort order / scale mode gibi ayarları üstlenir — kabaca <code>Canvas</code>'ın karşılığı.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 7. PREFAB ============ -->
+    <section id="prefab">
+      <div class="eyebrow"><span class="dot" style="background:var(--uitk)"></span>08 · Tekrarlayan elemanlar</div>
+      <h2>Instantiate yerine CloneTree / ListView</h2>
+      <p>Envanter slotu, tag butonu gibi tekrar eden bir öğeyi UGUI'de prefab'layıp <code>Instantiate()</code> edersin. UI Toolkit'te iki yol var: UXML'i bir <code>VisualTreeAsset</code> olarak yükleyip <code>CloneTree()</code> ile çoğaltmak, ya da veri listesi için hazır <code>ListView</code> kullanmak.</p>
+
+      <div class="compare">
+        <div class="card ugui">
+          <div class="card-head"><span class="chip"></span>Prefab çoğaltma</div>
+          <pre><span class="tag-kw">foreach</span> (<span class="tag-kw">var</span> tag <span class="tag-kw">in</span> allTags)
+{
+    <span class="tag-kw">var</span> slot = Instantiate(tagPrefab, container);
+    slot.GetComponent&lt;TagSlot&gt;().Bind(tag);
+}</pre>
+        </div>
+        <div class="card uitk">
+          <div class="card-head"><span class="chip"></span>CloneTree çoğaltma</div>
+          <pre><span class="tag-kw">foreach</span> (<span class="tag-kw">var</span> tag <span class="tag-kw">in</span> allTags)
+{
+    <span class="tag-type">VisualElement</span> slot = tagTemplate.CloneTree();
+    slot.Q&lt;Label&gt;(<span class="tag-str">"tag-name"</span>).text = tag.displayName;
+    container.Add(slot);
+}</pre>
+        </div>
+      </div>
+      <div class="callout">
+        <b>IndieGameDevTycoon bağlantısı:</b> senin ScriptableObject-per-tag yapındaki her tag butonunu ayrı GameObject yapmak yerine, tek bir UXML template'ini <code>CloneTree()</code> ile çoğaltıp "selected" USS class'ını toggle ederek state yönetebilirsin — DOTween yerine native <code>transition-property</code> ile geçiş animasyonu da eklenir.
+      </div>
+    </section>
+
+    <!-- ============ 8. KARAR ============ -->
+    <section id="karar">
+      <div class="eyebrow"><span class="dot" style="background:var(--uitk)"></span>09 · Karar</div>
+      <h2>Yeni projede hangisini seçmeli?</h2>
+      <table class="decision">
+        <thead>
+          <tr><th>Durum</th><th>Önerilen</th><th>Neden</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Oyun içi HUD, menü, diyalog kutusu</td>
+            <td><span class="pill ugui">UGUI</span><span class="pill uitk">UI Toolkit</span> ikisi de olur</td>
+            <td>UI Toolkit runtime desteği Unity 6000.x'te olgunlaştı; 2021.3 LTS'te TextMeshPro entegrasyonu ve animasyon ekosistemi hâlâ UGUI kadar zengin değildi.</td>
+          </tr>
+          <tr>
+            <td>Editor tool'u, custom inspector</td>
+            <td><span class="pill uitk">UI Toolkit</span></td>
+            <td>Artık standart; Odin Inspector'a tamamlayıcı olarak da düşünülebilir.</td>
+          </tr>
+          <tr>
+            <td>Sık güncellenen büyük liste (envanter, tag sistemi, tycoon UI'ı)</td>
+            <td><span class="pill uitk">UI Toolkit</span></td>
+            <td>GameObject overhead'i yok, ListView ile veri kaynağından otomatik oluşturma var.</td>
+          </tr>
+          <tr>
+            <td>DOTween'e bağımlı karmaşık animasyonlu UI</td>
+            <td><span class="pill ugui">UGUI</span></td>
+            <td>DOTween UI Toolkit elemanlarını doğrudan desteklemez; USS transition / experimental.animation öğrenmen gerekir.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <span>UGUI → UI Toolkit referansı</span>
+  <span>Rider'da açık tutmak için hazırlandı</span>
+</footer>
+
+</body>
+</html>
